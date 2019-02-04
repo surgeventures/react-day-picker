@@ -127,6 +127,7 @@ export class DayPicker extends Component {
     onCaptionClick: PropTypes.func,
     onWeekClick: PropTypes.func,
     onTodayButtonClick: PropTypes.func,
+    currentDate: PropTypes.object,
   };
 
   static defaultProps = {
@@ -508,18 +509,23 @@ export class DayPicker extends Component {
   }
 
   renderMonths() {
+    const { toMonth, modifiers, currentDate, ...props } = this.props;
+
+    const hasModifiers = modifiers && Object.keys(modifiers).length > 0;
     const months = [];
     const firstDayOfWeek = Helpers.getFirstDayOfWeekFromProps(this.props);
     for (let i = 0; i < this.props.numberOfMonths; i += 1) {
       const month = DateUtils.addMonths(this.state.currentMonth, i);
       months.push(
         <Month
-          key={i}
-          {...this.props}
-          month={month}
+          {...props}
+          modifiers={hasModifiers ? modifiers : undefined}
+          month={month.getTime()}
+          key={`${month.getFullYear()}-${month.getMonth()}`}
           firstDayOfWeek={firstDayOfWeek}
           onDayKeyDown={this.handleDayKeyDown}
           onDayClick={this.handleDayClick}
+          currentDate={currentDate}
         />
       );
     }

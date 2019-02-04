@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-export default class Weekdays extends Component {
+export default class Weekdays extends PureComponent {
   static propTypes = {
     classNames: PropTypes.shape({
       weekday: PropTypes.string.isRequired,
@@ -21,10 +21,6 @@ export default class Weekdays extends Component {
       PropTypes.instanceOf(React.Component),
     ]),
   };
-
-  shouldComponentUpdate(nextProps) {
-    return this.props !== nextProps;
-  }
 
   render() {
     const {

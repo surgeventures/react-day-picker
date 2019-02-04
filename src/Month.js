@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import Weekdays from './Weekdays';
@@ -9,7 +9,7 @@ import * as ModifiersUtils from './ModifiersUtils';
 import * as Helpers from './Helpers';
 import * as DateUtils from './DateUtils';
 
-export default class Month extends Component {
+export default class Month extends PureComponent {
   static propTypes = {
     classNames: PropTypes.shape({
       body: PropTypes.string.isRequired,
@@ -18,7 +18,6 @@ export default class Month extends Component {
       today: PropTypes.string.isRequired,
       week: PropTypes.string.isRequired,
     }).isRequired,
-    tabIndex: PropTypes.number,
 
     month: PropTypes.instanceOf(Date).isRequired,
     months: PropTypes.arrayOf(PropTypes.string),
@@ -62,14 +61,18 @@ export default class Month extends Component {
     onDayTouchEnd: PropTypes.func,
     onDayTouchStart: PropTypes.func,
     onWeekClick: PropTypes.func,
+    currentDate: PropTypes.object,
   };
 
   renderDay = day => {
-    const monthNumber = this.props.month.getMonth();
+    const { currentDate } = this.props;
+    const monthNumber = new Date(this.props.month).getMonth();
     const propModifiers = Helpers.getModifiersFromProps(this.props);
     const dayModifiers = ModifiersUtils.getModifiersForDay(day, propModifiers);
+    const isOutside = day.getMonth() !== monthNumber;
+
     if (
-      DateUtils.isSameDay(day, new Date()) &&
+      DateUtils.isSameDay(day, currentDate || new Date()) &&
       !Object.prototype.hasOwnProperty.call(
         propModifiers,
         this.props.classNames.today
@@ -77,17 +80,11 @@ export default class Month extends Component {
     ) {
       dayModifiers.push(this.props.classNames.today);
     }
-    if (day.getMonth() !== monthNumber) {
+    if (isOutside) {
       dayModifiers.push(this.props.classNames.outside);
     }
 
-    const isOutside = day.getMonth() !== monthNumber;
-    let tabIndex = -1;
-    // Focus on the first day of the month
-    if (this.props.onDayClick && !isOutside && day.getDate() === 1) {
-      tabIndex = this.props.tabIndex; // eslint-disable-line prefer-destructuring
-    }
-    const key = `${day.getFullYear()}${day.getMonth()}${day.getDate()}`;
+    const key = day.toISOString();
     const modifiers = {};
     dayModifiers.forEach(modifier => {
       modifiers[modifier] = true;
@@ -103,10 +100,6 @@ export default class Month extends Component {
         empty={
           isOutside && !this.props.showOutsideDays && !this.props.fixedWeeks
         }
-        tabIndex={tabIndex}
-        ariaLabel={this.props.localeUtils.formatDay(day, this.props.locale)}
-        ariaDisabled={isOutside || dayModifiers.indexOf('disabled') > -1}
-        ariaSelected={dayModifiers.indexOf('selected') > -1}
         onClick={this.props.onDayClick}
         onFocus={this.props.onDayFocus}
         onKeyDown={this.props.onDayKeyDown}
@@ -144,23 +137,30 @@ export default class Month extends Component {
       showWeekNumbers,
       showWeekDays,
       onWeekClick,
+      currentDate,
     } = this.props;
 
+    const monthDate = new Date(month);
+
     const captionProps = {
-      date: month,
+      date: monthDate,
       classNames,
       months,
       localeUtils,
       locale,
-      onClick: onCaptionClick ? e => onCaptionClick(month, e) : undefined,
+      onClick: onCaptionClick ? e => onCaptionClick(monthDate, e) : undefined,
     };
     const caption = React.isValidElement(captionElement)
       ? React.cloneElement(captionElement, captionProps)
       : React.createElement(captionElement, captionProps);
 
-    const weeks = Helpers.getWeekArray(month, firstDayOfWeek, fixedWeeks);
+    const weeks = Helpers.getWeekArray(monthDate, firstDayOfWeek, fixedWeeks);
     return (
-      <div className={classNames.month} role="grid">
+      <div
+        className={classNames.month}
+        role="grid"
+        data-current-month={DateUtils.isSameMonth(currentDate, monthDate)}
+      >
         {caption}
         {showWeekDays && (
           <Weekdays
@@ -204,7 +204,7 @@ export default class Month extends Component {
                         : undefined
                     }
                   >
-                    {this.props.renderWeek(weekNumber, week, month)}
+                    {this.props.renderWeek(weekNumber, week, monthDate)}
                   </div>
                 )}
                 {week.map(this.renderDay)}
