@@ -154,6 +154,7 @@ export class DayPicker extends Component {
     weekdayElement: <Weekday />,
     navbarElement: <Navbar classNames={classNames} />,
     captionElement: <Caption classNames={classNames} />,
+    hoveredArrowClassName: PropTypes.string,
   };
 
   dayPicker = null;
@@ -348,7 +349,7 @@ export class DayPicker extends Component {
         const nextMonthDayNodeIndex = 7 - daysAfterIndex;
         Helpers.getDayNodes(this.dayPicker, this.props.classNames)[
           nextMonthDayNodeIndex
-        ].focus();
+          ].focus();
       });
     } else {
       dayNodes[dayNodeIndex + 7].focus();
@@ -483,6 +484,7 @@ export class DayPicker extends Component {
       localeUtils,
       canChangeMonth,
       navbarElement,
+      hoveredArrowClassName,
       ...attributes
     } = this.props;
 
@@ -502,6 +504,7 @@ export class DayPicker extends Component {
       labels,
       locale,
       localeUtils,
+      hoveredArrowClassName,
     };
     return React.isValidElement(navbarElement)
       ? React.cloneElement(navbarElement, props)
@@ -509,7 +512,7 @@ export class DayPicker extends Component {
   }
 
   renderMonths() {
-    const { toMonth, modifiers, currentDate, ...props } = this.props;
+    const { toMonth, hoveredArrowClassName, modifiers, currentDate, ...props } = this.props;
 
     const hasModifiers = modifiers && Object.keys(modifiers).length > 0;
     const months = [];

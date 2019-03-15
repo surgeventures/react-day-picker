@@ -21,6 +21,7 @@ export default class Navbar extends Component {
       previousMonth: PropTypes.string.isRequired,
       nextMonth: PropTypes.string.isRequired,
     }),
+    hoveredArrowClassName: PropTypes.string,
   };
 
   static defaultProps = {
@@ -34,12 +35,26 @@ export default class Navbar extends Component {
     showNextButton: true,
   };
 
-  shouldComponentUpdate(nextProps) {
+  constructor(props) {
+    super(props);
+
+    this.arrowNextRef = React.createRef();
+    this.arrowPrevRef = React.createRef();
+
+    this.state = {
+      arrowNextHovered: false,
+      arrowPrevHovered: false,
+    };
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
     return (
       nextProps.labels !== this.props.labels ||
       nextProps.dir !== this.props.dir ||
       this.props.showPreviousButton !== nextProps.showPreviousButton ||
-      this.props.showNextButton !== nextProps.showNextButton
+      this.props.showNextButton !== nextProps.showNextButton ||
+      this.state.arrowNextHovered !== nextState.arrowNextHovered ||
+      this.state.arrowPrevHovered !== nextState.arrowPrevHovered
     );
   }
 
@@ -71,6 +86,40 @@ export default class Navbar extends Component {
     this.handlePreviousClick();
   };
 
+  handleStartHover = e => {
+    switch (e.target) {
+      case this.arrowNextRef.current:
+        this.setState({
+          arrowNextHovered: true,
+        });
+        break;
+      case this.arrowPrevRef.current:
+        this.setState({
+          arrowPrevHovered: true,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  handleEndHover = e => {
+    switch (e.target) {
+      case this.arrowNextRef.current:
+        this.setState({
+          arrowNextHovered: false,
+        });
+        break;
+      case this.arrowPrevRef.current:
+        this.setState({
+          arrowPrevHovered: false,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
   render() {
     const {
       classNames,
@@ -79,7 +128,10 @@ export default class Navbar extends Component {
       showNextButton,
       labels,
       dir,
+      hoveredArrowClassName,
     } = this.props;
+
+    const { arrowPrevHovered, arrowNextHovered } = this.state;
 
     let previousClickHandler;
     let nextClickHandler;
@@ -87,6 +139,8 @@ export default class Navbar extends Component {
     let nextKeyDownHandler;
     let shouldShowPrevious;
     let shouldShowNext;
+    let arrowPrevHoverClassName;
+    let arrowNextHoverClassName;
 
     if (dir === 'rtl') {
       previousClickHandler = this.handleNextClick;
@@ -95,6 +149,8 @@ export default class Navbar extends Component {
       nextKeyDownHandler = this.handlePreviousKeyDown;
       shouldShowNext = showPreviousButton;
       shouldShowPrevious = showNextButton;
+      arrowPrevHoverClassName = `${arrowNextHovered ? ` ${hoveredArrowClassName}` : ''}`;
+      arrowNextHoverClassName = `${arrowPrevHovered ? ` ${hoveredArrowClassName}` : ''}`;
     } else {
       previousClickHandler = this.handlePreviousClick;
       nextClickHandler = this.handleNextClick;
@@ -102,19 +158,21 @@ export default class Navbar extends Component {
       nextKeyDownHandler = this.handleNextKeyDown;
       shouldShowNext = showNextButton;
       shouldShowPrevious = showPreviousButton;
+      arrowPrevHoverClassName = `${arrowPrevHovered ? ` ${hoveredArrowClassName}` : ''}`;
+      arrowNextHoverClassName = `${arrowNextHovered ? ` ${hoveredArrowClassName}` : ''}`;
     }
 
     const previousClassName = shouldShowPrevious
-      ? classNames.navButtonPrev
+      ? `${classNames.navButtonPrev}${arrowPrevHoverClassName}`
       : `${classNames.navButtonPrev} ${
-          classNames.navButtonInteractionDisabled
-        }`;
+        classNames.navButtonInteractionDisabled
+        }${arrowPrevHoverClassName}`;
 
     const nextClassName = shouldShowNext
-      ? classNames.navButtonNext
+      ? `${classNames.navButtonNext}${arrowNextHoverClassName}`
       : `${classNames.navButtonNext} ${
-          classNames.navButtonInteractionDisabled
-        }`;
+        classNames.navButtonInteractionDisabled
+        }${arrowNextHoverClassName}`;
 
     const previousButton = (
       <span
@@ -125,6 +183,11 @@ export default class Navbar extends Component {
         className={previousClassName}
         onKeyDown={shouldShowPrevious ? previousKeyDownHandler : undefined}
         onClick={shouldShowPrevious ? previousClickHandler : undefined}
+        onMouseEnter={this.handleStartHover}
+        onTouchStart={this.handleStartHover}
+        onMouseLeave={this.handleEndHover}
+        onTouchEnd={this.handleEndHover}
+        ref={this.arrowPrevRef}
       />
     );
 
@@ -137,14 +200,17 @@ export default class Navbar extends Component {
         className={nextClassName}
         onKeyDown={shouldShowNext ? nextKeyDownHandler : undefined}
         onClick={shouldShowNext ? nextClickHandler : undefined}
+        onMouseEnter={this.handleStartHover}
+        onTouchStart={this.handleStartHover}
+        onMouseLeave={this.handleEndHover}
+        onTouchEnd={this.handleEndHover}
+        ref={this.arrowNextRef}
       />
     );
 
     return (
       <div className={className || classNames.navBar}>
-        {dir === 'rtl'
-          ? [nextButton, previousButton]
-          : [previousButton, nextButton]}
+        {dir === 'rtl' ? [nextButton, previousButton] : [previousButton, nextButton]}
       </div>
     );
   }
