@@ -1,3 +1,6 @@
+## Build
+Please, use node in version >=4 and <= 9
+
 <p align="center">
 <a href="http://react-day-picker.js.org"><img width="80" style="margin: 0 auto" alt="title" src="https://user-images.githubusercontent.com/120693/33364057-0d4a962a-d4e3-11e7-8506-0f9aede2b345.png"></a>
 </p>
