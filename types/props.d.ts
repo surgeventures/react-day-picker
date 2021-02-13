@@ -49,12 +49,14 @@ export interface DayPickerProps {
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
   >;
+  currentDate?: Date,
   disabledDays?: Modifier | Modifier[];
   showOutsideDays?: boolean;
   enableOutsideDaysClick?: boolean;
   firstDayOfWeek?: number;
   fixedWeeks?: boolean;
   fromMonth?: Date;
+  hoveredArrowClassName?: string;
   initialMonth?: Date;
   labels?: { previousMonth: string; nextMonth: string };
   locale?: string;
